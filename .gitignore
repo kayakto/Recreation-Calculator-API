@@ -1,0 +1,38 @@
+# Gradle
+.gradle/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Visual Studio Code
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application
+application-local.yml
+application-dev.yml
+
+README.md
