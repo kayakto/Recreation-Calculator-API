@@ -138,4 +138,19 @@ public class RouteController {
 
         return ResponseEntity.ok(recommendations);
     }
+
+    @DeleteMapping("/{routeId}")
+    @Operation(summary = "Удалить маршрут пользователя с расчетом")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Маршрут и расчет удалены"),
+            @ApiResponse(responseCode = "404", description = "Маршрут не найден"),
+            @ApiResponse(responseCode = "401", description = "Нет доступа"),
+            @ApiResponse(responseCode = "403", description = "Нет прав")
+    })
+    public ResponseEntity<Void> deleteRoute(@PathVariable Long routeId) {
+        String userEmail = getCurrentUsername();
+        log.info("DELETE /api/v1/routes/{} - user: {}", routeId, userEmail);
+        routeService.deleteRoute(routeId, userEmail);
+        return ResponseEntity.noContent().build();
+    }
 }

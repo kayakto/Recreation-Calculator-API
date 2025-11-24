@@ -157,4 +157,21 @@ public class RouteService {
 
         return response;
     }
+
+    @Transactional
+    public void deleteRoute(Long routeId, String userEmail) {
+        // 1. Проверить, что маршрут принадлежит пользователю
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
+
+        Route route = routeRepository.findByIdAndUserIdWithCalculation(routeId, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Маршрут не найден"));
+
+        if (!route.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Доступ запрещён");
+        }
+
+        // 2. Удалить маршрут (расчёт удалится каскадно)
+        routeRepository.delete(route);
+    }
 }
