@@ -41,6 +41,7 @@ public class RouteService {
                 .user(user)
                 .routeName(request.getRouteName())
                 .routeType(request.getRouteType())
+                .routeTimeType(request.getRouteTimeType())  // ← ДОБАВИТЬ если его нет
                 .tSut(request.getTSut())
                 .tSezon(request.getTSezon())
                 .gs(request.getGs())
@@ -53,19 +54,14 @@ public class RouteService {
                 .managementFactors(request.getManagementFactors() != null ? request.getManagementFactors() : List.of())
                 .build();
 
+        // 1. Сохранить Route
         Route savedRoute = routeRepository.save(route);
 
-        RouteCalculation calculation = RouteCalculation.builder()
-                .route(route)
-                .cfn(request.getCalculation().getCfn())
-                .mCoefficient(request.getCalculation().getMCoefficient())  // ← ВАЖНО!
-                .bcc(request.getCalculation().getBcc())
-                .pcc(request.getCalculation().getPcc())
-                .rcc(request.getCalculation().getRcc())
-                .build();
+        // 2. ПРАВИЛЬНО: Передать Route в calculationService
+        RouteCalculation calculation = calculationService.saveCalculation(savedRoute);  // ✅
 
+        // 3. Установить расчет в Route
         savedRoute.setCalculation(calculation);
-        calculationService.saveCalculation(calculation);
 
         log.info("Route '{}' successfully created with ID: {}", savedRoute.getRouteName(), savedRoute.getId());
 
@@ -126,6 +122,7 @@ public class RouteService {
                 .id(route.getId())
                 .routeName(route.getRouteName())
                 .routeType(route.getRouteType())
+                .routeTimeType(route.getRouteTimeType())
                 .tSut(route.getTSut())
                 .tSezon(route.getTSezon())
                 .gs(route.getGs())
@@ -149,6 +146,7 @@ public class RouteService {
                     .bcc(calc.getBcc())
                     .pcc(calc.getPcc())
                     .rcc(calc.getRcc())
+                    .maxGroups(calc.getMaxGroups())
                     .createdAt(calc.getCreatedAt())
                     .build());
         }

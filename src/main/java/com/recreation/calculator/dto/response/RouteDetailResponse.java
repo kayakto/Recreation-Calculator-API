@@ -19,6 +19,7 @@ public class RouteDetailResponse {
     private Long id;
     private String routeName;
     private String routeType;
+    private String routeTimeType;
 
     // Основные параметры
     private BigDecimal tSut;

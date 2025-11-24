@@ -21,6 +21,7 @@ public class RouteCalculationResponse {
     private Integer bcc;
     private Integer pcc;
     private Integer rcc;
+    private Integer maxGroups;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;

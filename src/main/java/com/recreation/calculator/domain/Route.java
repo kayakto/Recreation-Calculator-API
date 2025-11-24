@@ -87,4 +87,16 @@ public class Route {
 
     @OneToOne(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
     private RouteCalculation calculation;
+
+    @Column(name = "route_time_type", nullable = false)
+    private String routeTimeType; // 'fixed_time' или 'unlimited_time'
+
+    // Добавить методы
+    public boolean isFixedTimeRoute() {
+        return "fixed_time".equals(this.routeTimeType);
+    }
+
+    public boolean isUnlimitedTimeRoute() {
+        return "unlimited_time".equals(this.routeTimeType);
+    }
 }
