@@ -43,6 +43,16 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
+    public String getEmailFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.getSubject();
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parser()

@@ -2,6 +2,7 @@ package com.recreation.calculator.service;
 
 import com.recreation.calculator.domain.User;
 import com.recreation.calculator.dto.response.AuthResponse;
+import com.recreation.calculator.dto.response.UserResponse;
 import com.recreation.calculator.exception.ResourceNotFoundException;
 import com.recreation.calculator.repository.UserRepository;
 import com.recreation.calculator.security.JwtTokenProvider;
@@ -85,5 +86,71 @@ public class AuthService {
         log.info("User {} successfully registered", email);
 
         return AuthResponse.of(token, jwtExpirationMs, email);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getProfile(String email) {
+        log.info("Getting profile for user: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
+
+        return UserResponse.of(user.getId(), user.getEmail(), user.getLogin(),
+                user.getCreatedAt(), user.getUpdatedAt());
+    }
+
+    @Transactional
+    public UserResponse changeEmail(String currentEmail, String newEmail, String password) {
+        log.info("Changing email for user: {} to {}", currentEmail, newEmail);
+
+        // Проверяем пароль
+        User user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("Неверный пароль");
+        }
+
+        // Проверяем, что новый email не занят
+        if (userRepository.findByEmail(newEmail).isPresent()) {
+            throw new IllegalArgumentException("Email уже используется");
+        }
+
+        // Обновляем email и login (они одинаковые)
+        user.setEmail(newEmail);
+        user.setLogin(newEmail);
+        userRepository.save(user);
+
+        log.info("Email changed successfully for user: {}", newEmail);
+        return UserResponse.of(user.getId(), user.getEmail(), user.getLogin(),
+                user.getCreatedAt(), user.getUpdatedAt());
+    }
+
+    @Transactional
+    public void changePassword(String email, String oldPassword, String newPassword, String confirmPassword) {
+        log.info("Changing password for user: {}", email);
+
+        // Проверяем новые пароли
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Новые пароли не совпадают");
+        }
+
+        if (newPassword.length() < 6) {
+            throw new IllegalArgumentException("Новый пароль должен быть не менее 6 символов");
+        }
+
+        // Проверяем старый пароль
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Старый пароль неверный");
+        }
+
+        // Обновляем пароль
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        log.info("Password changed successfully for user: {}", email);
     }
 }

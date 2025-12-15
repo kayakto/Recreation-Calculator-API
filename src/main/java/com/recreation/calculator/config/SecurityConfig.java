@@ -31,8 +31,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Публичные endpoint'ы для авторизации
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
+
+                        // Swagger документация
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -41,7 +44,14 @@ public class SecurityConfig {
                                 "/v3/api-docs",
                                 "/v3/api-docs.yaml"
                         ).permitAll()
+
+                        // Публичные endpoint'ы
                         .requestMatchers(HttpMethod.GET, "/api/v1/routes/recommendations").permitAll()
+
+                        // ← ИСПРАВЛЕНО: правильный путь для UserController
+                        .requestMatchers("/v1/users/**").authenticated()
+
+                        // Остальные request'ы требуют авторизацию
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
