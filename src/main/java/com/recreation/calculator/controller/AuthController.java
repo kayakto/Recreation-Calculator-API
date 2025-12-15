@@ -1,6 +1,7 @@
 package com.recreation.calculator.controller;
 
 import com.recreation.calculator.dto.request.LoginRequest;
+import com.recreation.calculator.dto.request.RegisterRequest;
 import com.recreation.calculator.dto.response.AuthResponse;
 import com.recreation.calculator.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,5 +44,29 @@ public class AuthController {
         log.info("Login attempt for user: {}", request.getEmail());
         AuthResponse response = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    @Operation(
+            summary = "Регистрация нового пользователя",
+            description = "Создаёт нового пользователя и возвращает JWT токен. Логин автоматически совпадает с email"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Успешная регистрация",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Неверный формат запроса или ошибка валидации"),
+            @ApiResponse(responseCode = "409", description = "Пользователь уже существует")
+    })
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Registration attempt for email: {}", request.getEmail());
+        AuthResponse response = authService.register(
+                request.getEmail(),
+                request.getPassword(),
+                request.getConfirmPassword()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
